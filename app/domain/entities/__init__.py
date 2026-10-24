@@ -1,15 +1,19 @@
-from app.domain.entities.aluno import Aluno, AlunoResumo, MatriculaDoAluno
-from app.domain.entities.curso import Curso, CursoResumo
-from app.domain.entities.disciplina import (
-    Disciplina,
-    DisciplinaResumo,
-    MatriculaDaDisciplina,
-)
-from app.domain.entities.matricula import Matricula
+from app.domain.entities.administrador import Administrador
+from app.domain.entities.atleta import Atleta
+from app.domain.entities.atleta_do_elenco import AtletaDoElenco
+from app.domain.entities.elenco import Elenco, ElencoResumo
+from app.domain.entities.jogo import Jogo, JogoResumo
 from app.domain.entities.user import UserIdentity, UserRole
 
+
 __all__ = [
-    "Aluno", "AlunoResumo", "Curso", "CursoResumo", "Disciplina",
-    "DisciplinaResumo", "Matricula", "MatriculaDaDisciplina",
-    "MatriculaDoAluno", "UserIdentity", "UserRole",
+    "Administrador",
+    "Atleta",
+    "AtletaDoElenco",
+    "Elenco",
+    "ElencoResumo",
+    "Jogo",
+    "JogoResumo",
+    "UserIdentity",
+    "UserRole",
 ]

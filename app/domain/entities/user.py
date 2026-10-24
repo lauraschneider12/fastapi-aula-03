@@ -4,8 +4,8 @@ from uuid import UUID
 
 
 class UserRole(str, enum.Enum):
-    PROFESSOR = "professor"
-    COORDENADOR = "coordenador"
+    ATLETA = "atleta"
+    ADMINISTRADOR = "administrador"
 
 
 @dataclass(frozen=True)

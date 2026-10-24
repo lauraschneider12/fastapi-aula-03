@@ -1,6 +1,28 @@
-from app.application.dtos.aluno import AlunoDTO
-from app.application.dtos.curso import CursoDTO
-from app.application.dtos.disciplina import DisciplinaDTO
-from app.application.dtos.matricula import MatriculaDTO
 
-__all__ = ["AlunoDTO", "CursoDTO", "DisciplinaDTO", "MatriculaDTO"]
+from app.application.dtos.atleta import (
+    CriarAtletaDTO,
+    AtualizarAtletaDTO,
+)
+from app.application.dtos.elenco import (
+    CriarElencoDTO,
+    AtualizarElencoDTO,
+)
+from app.application.dtos.jogo import (
+    CriarJogoDTO,
+    AtualizarJogoDTO,
+)
+from app.application.dtos.user import (
+    CriarUserDTO,
+    AtualizarUserDTO,
+)
+
+__all__ = [
+    "CriarAtletaDTO",
+    "AtualizarAtletaDTO",
+    "CriarElencoDTO",
+    "AtualizarElencoDTO",
+    "CriarJogoDTO",
+    "AtualizarJogoDTO",
+    "CriarUserDTO",
+    "AtualizarUserDTO",
+]
