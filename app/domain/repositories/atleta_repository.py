@@ -1,3 +1,4 @@
+
 from abc import ABC, abstractmethod
 from uuid import UUID
 
@@ -13,7 +14,8 @@ class AtletaRepository(ABC):
         posicao: str,
         numero: int,
         user_id: UUID,
-) -> Atleta: ...
+    ) -> Atleta:
+        ...
 
     @abstractmethod
     async def list_atletas(self) -> list[Atleta]:
@@ -25,10 +27,18 @@ class AtletaRepository(ABC):
 
     @abstractmethod
     async def update_atleta(
-        self, atleta_id: int, nome: str, posicao: str, numero: int
+        self,
+        atleta_id: int,
+        nome: str,
+        posicao: str,
+        numero: int,
+        status: bool,
     ) -> Atleta | None:
         ...
 
     @abstractmethod
     async def delete_atleta(self, atleta_id: int) -> bool:
         ...
+    @abstractmethod
+    async def get_atleta_by_user_id(self, user_id: UUID) -> Atleta | None:
+     ...

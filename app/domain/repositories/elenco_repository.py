@@ -1,6 +1,8 @@
+
 from abc import ABC, abstractmethod
 
 from app.domain.entities.elenco import Elenco
+from app.domain.entities.atleta import Atleta
 
 
 class ElencoRepository(ABC):
@@ -29,4 +31,22 @@ class ElencoRepository(ABC):
 
     @abstractmethod
     async def delete_elenco(self, elenco_id: int) -> bool:
+        ...
+
+    @abstractmethod
+    async def add_atleta_to_elenco(
+        self, elenco_id: int, atleta_id: int
+    ) -> bool:
+        ...
+
+    @abstractmethod
+    async def list_atletas_by_elenco(
+        self, elenco_id: int
+    ) -> list[Atleta]:
+        ...
+
+    @abstractmethod
+    async def remove_atleta_from_elenco(
+        self, elenco_id: int, atleta_id: int
+    ) -> bool:
         ...

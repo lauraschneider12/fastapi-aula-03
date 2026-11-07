@@ -1,10 +1,11 @@
-from app.presentation.schemas.atleta_schemas import AtletaCreate, AtletaResponse
-from app.presentation.schemas.elenco_schemas import ElencoCreate, ElencoResponse, Elenco
-from app.presentation.schemas.jogo_schemas import JogoCreate, JogoResponse, Jogo
+from app.presentation.schemas.atleta_schemas import AtletaCreate, AtletaRead, AtletaUpdate
+from app.presentation.schemas.elenco_schemas import ElencoCreate, ElencoRead, ElencoUpdate
+from app.presentation.schemas.jogo_schemas import JogoCreate, JogoRead, JogoUpdate
 from app.presentation.schemas.user_schemas import UserCreate, UserRead, UserUpdate
 
 __all__ = [
-    "AtletaCreate", "AtletaResponse", "ElencoCreate", "ElencoResponse", "Elenco",
-    "JogoCreate", "JogoResponse", "Jogo",
+    "AtletaCreate", "AtletaRead", "AtletaUpdate",
+    "ElencoCreate", "ElencoRead", "ElencoUpdate",
+    "JogoCreate", "JogoRead", "JogoUpdate",
     "UserCreate", "UserRead", "UserUpdate",
 ]

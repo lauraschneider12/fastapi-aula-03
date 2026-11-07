@@ -85,12 +85,14 @@ class AtletaRepositoryImpl(AtletaRepository):
 
         return self._to_entity(atleta) if atleta else None
 
+    
     async def update_atleta(
         self,
         atleta_id: int,
         nome: str,
         posicao: str,
         numero: int,
+        status: bool,
     ) -> Atleta | None:
         result = await self.session.execute(
             select(AtletaModel).where(
@@ -105,10 +107,12 @@ class AtletaRepositoryImpl(AtletaRepository):
         atleta.nome = nome
         atleta.posicao = posicao
         atleta.numero = numero
+        atleta.status = status
 
         await self.session.commit()
 
         return await self.get_atleta(atleta_id)
+
 
     async def delete_atleta(self, atleta_id: int) -> bool:
         result = await self.session.execute(
@@ -121,7 +125,18 @@ class AtletaRepositoryImpl(AtletaRepository):
         if atleta is None:
             return False
 
-        await self.session.delete(atleta)
+        atleta.status = False
+
         await self.session.commit()
 
         return True
+    async def get_atleta_by_user_id(self, user_id: UUID) -> Atleta | None:
+        result = await self.session.execute(
+            select(AtletaModel)
+            .options(selectinload(AtletaModel.user))
+            .where(AtletaModel.user_id == user_id)
+        )
+
+        atleta = result.scalar_one_or_none()
+
+        return self._to_entity(atleta) if atleta else None

@@ -4,6 +4,8 @@ from app.domain.entities.atleta_do_elenco import AtletaDoElenco
 from app.domain.entities.elenco import Elenco, ElencoResumo
 from app.domain.entities.jogo import Jogo, JogoResumo
 from app.domain.entities.user import UserIdentity, UserRole
+from app.domain.entities.treino import Treino
+from app.domain.entities.presenca import Presenca
 
 
 __all__ = [
@@ -16,4 +18,7 @@ __all__ = [
     "JogoResumo",
     "UserIdentity",
     "UserRole",
+    "Treino",
+    "Presenca",
+
 ]

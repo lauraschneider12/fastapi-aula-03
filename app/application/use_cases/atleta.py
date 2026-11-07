@@ -1,6 +1,3 @@
-
-from uuid import UUID
-
 from app.application.dtos.atleta import (
     CriarAtletaDTO,
     AtualizarAtletaDTO,
@@ -8,6 +5,7 @@ from app.application.dtos.atleta import (
 from app.domain.repositories.atleta_repository import AtletaRepository
 from app.domain.repositories.user_repository import UserRepository
 from app.domain.entities.user import UserRole
+from app.infrastructure.email.email_service import enviar_credenciais
 
 
 class AtletaUseCases:
@@ -33,12 +31,24 @@ class AtletaUseCases:
             role=UserRole.ATLETA.value,
         )
 
-        return await self.atleta_repository.create_atleta(
+        atleta = await self.atleta_repository.create_atleta(
             nome=dto.nome,
             posicao=dto.posicao,
             numero=dto.numero,
             user_id=usuario.id,
         )
+
+        try:
+            await enviar_credenciais(
+                email_destinatario=dto.email,
+                senha=dto.senha,
+            )
+        except Exception:
+            print(
+                "Atleta cadastrada, mas não foi possível enviar o e-mail."
+            )
+
+        return atleta
 
     async def listar(self):
         return await self.atleta_repository.list_atletas()
@@ -52,20 +62,19 @@ class AtletaUseCases:
         return atleta
 
     async def atualizar(self, dto: AtualizarAtletaDTO):
-        atleta = await self.atleta_repository.get_atleta(dto.atleta_id)
-
-        if atleta is None:
-            raise ValueError("Atleta não encontrado.")
+        atleta = await self.buscar(dto.atleta_id)
 
         nome = dto.nome if dto.nome is not None else atleta.nome
         posicao = dto.posicao if dto.posicao is not None else atleta.posicao
         numero = dto.numero if dto.numero is not None else atleta.numero
+        status = dto.status if dto.status is not None else atleta.status
 
         atualizado = await self.atleta_repository.update_atleta(
             atleta_id=dto.atleta_id,
             nome=nome,
             posicao=posicao,
             numero=numero,
+            status=status,
         )
 
         if atualizado is None:
@@ -74,9 +83,9 @@ class AtletaUseCases:
         return atualizado
 
     async def excluir(self, atleta_id: int) -> bool:
-        atleta = await self.atleta_repository.get_atleta(atleta_id)
+        atleta = await self.buscar(atleta_id)
 
-        if atleta is None:
-            raise ValueError("Atleta não encontrado.")
+        if not atleta.status:
+            raise ValueError("Este atleta já está desativado.")
 
         return await self.atleta_repository.delete_atleta(atleta_id)

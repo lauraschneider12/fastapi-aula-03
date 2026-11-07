@@ -11,9 +11,9 @@ class ElencoUseCases:
         self.repository = repository
 
     async def criar(self, dados: CriarElencoDTO):
-        existente = await self.repository.list_elencos()
+        existentes = await self.repository.list_elencos()
 
-        if any(elenco.ano == dados.ano for elenco in existente):
+        if any(elenco.ano == dados.ano for elenco in existentes):
             raise ValueError("Já existe um elenco cadastrado para esse ano.")
 
         return await self.repository.create_elenco(
@@ -39,6 +39,7 @@ class ElencoUseCases:
         status = dados.status if dados.status is not None else elenco.status
 
         existentes = await self.repository.list_elencos()
+
         if any(
             item.id != dados.elenco_id and item.ano == ano
             for item in existentes
@@ -53,9 +54,47 @@ class ElencoUseCases:
 
     async def excluir(self, elenco_id: int):
         await self.buscar(elenco_id)
+
         excluido = await self.repository.delete_elenco(elenco_id)
 
         if not excluido:
             raise ValueError("Não foi possível excluir o elenco.")
+
+        return True
+
+    # Adiciona um atleta a um elenco
+    async def adicionar_atleta(self, elenco_id: int, atleta_id: int):
+        await self.buscar(elenco_id)
+
+        adicionado = await self.repository.add_atleta_to_elenco(
+            elenco_id=elenco_id,
+            atleta_id=atleta_id,
+        )
+
+        if not adicionado:
+            raise ValueError(
+                "Não foi possível adicionar o atleta. "
+                "Verifique se ele existe e se já está nesse elenco."
+            )
+
+        return True
+
+    # Lista os atletas associados a um elenco
+    async def listar_atletas(self, elenco_id: int):
+        await self.buscar(elenco_id)
+
+        return await self.repository.list_atletas_by_elenco(elenco_id)
+
+    # Remove somente a associação entre o atleta e o elenco
+    async def remover_atleta(self, elenco_id: int, atleta_id: int):
+        await self.buscar(elenco_id)
+
+        removido = await self.repository.remove_atleta_from_elenco(
+            elenco_id=elenco_id,
+            atleta_id=atleta_id,
+        )
+
+        if not removido:
+            raise ValueError("Atleta não encontrado nesse elenco.")
 
         return True

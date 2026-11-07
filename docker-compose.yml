@@ -1,7 +1,9 @@
 services:
   web:
     container_name: fastapi_app
-    build: .
+    build: . 
+    env_file:
+      - .env
     ports:
       - "17000:8000"
     volumes:
@@ -41,6 +43,20 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - db
+
+  frontend:
+    build: ./frontend
+    container_name: svelte_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:17000
+    depends_on:
+      - web
+
 
 volumes:
   postgres_data:

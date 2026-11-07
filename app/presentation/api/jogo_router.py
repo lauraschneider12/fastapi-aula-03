@@ -1,16 +1,30 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.application.dtos.gol import CriarGolDTO
+from app.application.dtos.cartao import CriarCartaoDTO
 
-from app.infrastructure.database.models import JogoModel, ElencoModel
-from app.infrastructure.database.session import get_db
+from app.application.dtos.jogo import AtualizarJogoDTO
+from app.application.dtos.jogo_completo import (
+    CriarJogoCompletoDTO,
+    GolJogoDTO,
+    CartaoJogoDTO,
+)
+
+from app.application.use_cases.jogo import JogoUseCases
+from app.application.use_cases.jogo_completo import JogoCompletoUseCase
+
 from app.presentation.dependencies.admin import require_admin
+from app.presentation.dependencies.use_cases import (
+    get_jogo_use_cases,
+    get_jogo_completo_use_case,
+)
+
 from app.presentation.schemas.jogo_schemas import (
     JogoCreate,
     JogoUpdate,
     JogoRead,
 )
+
 
 router = APIRouter(
     prefix="/jogos",
@@ -19,7 +33,7 @@ router = APIRouter(
 )
 
 
-# POST - Cadastrar jogo
+# CADASTRAR JOGO COMPLETO
 @router.post(
     "/",
     response_model=JogoRead,
@@ -27,112 +41,109 @@ router = APIRouter(
 )
 async def criar_jogo(
     dados: JogoCreate,
-    db: AsyncSession = Depends(get_db),
+    use_cases: JogoCompletoUseCase = Depends(
+        get_jogo_completo_use_case
+    ),
 ):
-    elenco = await db.get(ElencoModel, dados.elenco_id)
-
-    if elenco is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Elenco não encontrado.",
+    try:
+        dto = CriarJogoCompletoDTO(
+            local=dados.local,
+            time_adversario=dados.time_adversario,
+            data=dados.data,
+            elenco_id=dados.elenco_id,
+            gols=[
+                GolJogoDTO(id_jogador=gol.id_jogador)
+                for gol in dados.gols
+            ],
+            cartoes=[
+                CartaoJogoDTO(
+                    tipo=cartao.tipo,
+                    id_jogador=cartao.id_jogador,
+                )
+                for cartao in dados.cartoes
+            ],
         )
 
-    jogo = JogoModel(**dados.model_dump())
+        resultado = await use_cases.executar(dto)
 
-    db.add(jogo)
-    await db.commit()
-    await db.refresh(jogo)
+        return resultado["jogo"]
 
-    return jogo
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(erro),
+        )
 
 
-# GET - Listar todos os jogos
+# LISTAR JOGOS
 @router.get("/", response_model=list[JogoRead])
 async def listar_jogos(
-    db: AsyncSession = Depends(get_db),
+    use_cases: JogoUseCases = Depends(get_jogo_use_cases),
 ):
-    resultado = await db.scalars(
-        select(JogoModel).order_by(JogoModel.data)
-    )
-
-    return resultado.all()
+    return await use_cases.listar()
 
 
-# GET - Buscar jogo por ID
+# BUSCAR JOGO
 @router.get("/{jogo_id}", response_model=JogoRead)
 async def buscar_jogo(
     jogo_id: int,
-    db: AsyncSession = Depends(get_db),
+    use_cases: JogoUseCases = Depends(get_jogo_use_cases),
 ):
-    jogo = await db.get(JogoModel, jogo_id)
+    try:
+        return await use_cases.buscar(jogo_id)
 
-    if jogo is None:
+    except ValueError as erro:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Jogo não encontrado.",
+            detail=str(erro),
         )
 
-    return jogo
 
-
-# PUT - Atualizar jogo
+# ATUALIZAR JOGO
 @router.put("/{jogo_id}", response_model=JogoRead)
 async def atualizar_jogo(
     jogo_id: int,
     dados: JogoUpdate,
-    db: AsyncSession = Depends(get_db),
+    use_cases: JogoUseCases = Depends(get_jogo_use_cases),
 ):
-    jogo = await db.get(JogoModel, jogo_id)
+    try:
+        dados_dict = dados.model_dump(exclude_unset=True)
 
-    if jogo is None:
+        gols = dados_dict.pop("gols", None)
+        cartoes = dados_dict.pop("cartoes", None)
+
+        dto = AtualizarJogoDTO(
+            jogo_id=jogo_id,
+            **dados_dict,
+            gols=(
+                [
+                    CriarGolDTO(
+                        id_jogo=jogo_id,
+                        id_jogador=gol["id_jogador"],
+                    )
+                    for gol in gols
+                ]
+                if gols is not None
+                else None
+            ),
+            cartoes=(
+                [
+                    CriarCartaoDTO(
+                        id_jogo=jogo_id,
+                        id_jogador=cartao["id_jogador"],
+                        tipo=cartao["tipo"],
+                    )
+                    for cartao in cartoes
+                ]
+                if cartoes is not None
+                else None
+            ),
+        )
+
+        return await use_cases.atualizar(dto)
+
+    except ValueError as erro:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Jogo não encontrado.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(erro),
         )
-
-    alteracoes = dados.model_dump(exclude_unset=True)
-
-    # Se foi informado um elenco, verifica se ele existe.
-    if (
-        "elenco_id" in alteracoes
-        and alteracoes["elenco_id"] is not None
-    ):
-        elenco = await db.get(
-            ElencoModel,
-            alteracoes["elenco_id"],
-        )
-
-        if elenco is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Elenco informado não encontrado.",
-            )
-
-    for campo, valor in alteracoes.items():
-        if valor is not None or campo == "placar":
-            setattr(jogo, campo, valor)
-
-    await db.commit()
-    await db.refresh(jogo)
-
-    return jogo
-
-
-# DELETE - Excluir jogo
-@router.delete("/{jogo_id}")
-async def excluir_jogo(
-    jogo_id: int,
-    db: AsyncSession = Depends(get_db),
-):
-    jogo = await db.get(JogoModel, jogo_id)
-
-    if jogo is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Jogo não encontrado.",
-        )
-
-    await db.delete(jogo)
-    await db.commit()
-
-    return {"mensagem": "Jogo excluído com sucesso."}

@@ -1,6 +1,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.presentation.schemas.atleta_schemas import AtletaRead
 
 from app.application.dtos.elenco import (
     CriarElencoDTO,
@@ -101,6 +102,7 @@ async def atualizar_elenco(
         ) from exc
 
 
+
 @router.delete("/{elenco_id}")
 async def excluir_elenco(
     elenco_id: int,
@@ -109,8 +111,68 @@ async def excluir_elenco(
     try:
         await use_cases.excluir(elenco_id)
         return {"mensagem": "Elenco excluído com sucesso."}
+
+    except ValueError as exc:
+        mensagem = str(exc)
+
+        if "jogos associados" in mensagem.lower():
+            codigo = status.HTTP_409_CONFLICT
+        else:
+            codigo = status.HTTP_404_NOT_FOUND
+
+        raise HTTPException(
+            status_code=codigo,
+            detail=mensagem,
+        ) from exc
+    
+@router.post(
+    "/{elenco_id}/atletas/{atleta_id}",
+    status_code=status.HTTP_201_CREATED,
+)
+async def adicionar_atleta_ao_elenco(
+    elenco_id: int,
+    atleta_id: int,
+    use_cases: ElencoUseCases = Depends(get_elenco_use_cases),
+):
+    try:
+        await use_cases.adicionar_atleta(elenco_id, atleta_id)
+        return {"mensagem": "Atleta adicionado ao elenco com sucesso."}
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+
+
+@router.get(
+    "/{elenco_id}/atletas",
+    response_model=list[AtletaRead],
+)
+async def listar_atletas_do_elenco(
+    elenco_id: int,
+    use_cases: ElencoUseCases = Depends(get_elenco_use_cases),
+):
+    try:
+        return await use_cases.listar_atletas(elenco_id)
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(exc),
         ) from exc
+
+
+@router.delete("/{elenco_id}/atletas/{atleta_id}")
+async def remover_atleta_do_elenco(
+    elenco_id: int,
+    atleta_id: int,
+    use_cases: ElencoUseCases = Depends(get_elenco_use_cases),
+):
+    try:
+        await use_cases.remover_atleta(elenco_id, atleta_id)
+        return {"mensagem": "Atleta removido do elenco com sucesso."}
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+

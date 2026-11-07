@@ -15,6 +15,15 @@ from app.application.dtos.user import (
     CriarUserDTO,
     AtualizarUserDTO,
 )
+from app.application.dtos.treino import (
+    CriarTreinoDTO,
+    AtualizarTreinoDTO,
+)
+from app.application.dtos.presenca import (
+    CriarPresencaDTO,
+    AtualizarConfirmacaoDTO,
+    AtualizarPresenteDTO
+)
 
 __all__ = [
     "CriarAtletaDTO",
@@ -25,4 +34,10 @@ __all__ = [
     "AtualizarJogoDTO",
     "CriarUserDTO",
     "AtualizarUserDTO",
+    "CriarTreinoDTO",
+    "AtualizarTreinoDTO",
+    "CriarPresencaDTO",
+    "AtualizarConfirmacaoDTO",
+    "AtualizarPresenteDTO"
 ]
+

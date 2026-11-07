@@ -3,9 +3,11 @@ from app.infrastructure.repositories.user_repository_impl import UserRepositoryI
 from app.infrastructure.repositories.elenco_repository_impl import ElencoRepositoryImpl
 from app.infrastructure.repositories.jogo_repository_impl import JogoRepositoryImpl
 from app.infrastructure.repositories.atleta_repository_impl import AtletaRepositoryImpl
+from app.infrastructure.repositories.treino_repository_impl import TreinoRepositoryImpl
 __all__ = [
     "UserRepositoryImpl",
     "ElencoRepositoryImpl",
     "JogoRepositoryImpl",
     "AtletaRepositoryImpl",
+    "TreinoRepositoryImpl",
 ]

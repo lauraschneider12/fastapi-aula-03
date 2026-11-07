@@ -1,3 +1,4 @@
+
 from abc import ABC, abstractmethod
 from datetime import datetime
 
@@ -13,7 +14,8 @@ class JogoRepository(ABC):
         time_adversario: str,
         data: datetime,
         elenco_id: int,
-        placar: str | None = None,
+        gol_local: int,
+        gol_visitante: int,
     ) -> Jogo:
         ...
 
@@ -23,7 +25,8 @@ class JogoRepository(ABC):
 
     @abstractmethod
     async def get_jogo(
-        self, jogo_id: int
+        self,
+        jogo_id: int,
     ) -> Jogo | None:
         ...
 
@@ -35,10 +38,14 @@ class JogoRepository(ABC):
         time_adversario: str,
         data: datetime,
         elenco_id: int,
-        placar: str | None = None,
+        gol_local: int,
+        gol_visitante: int,
     ) -> Jogo | None:
         ...
 
     @abstractmethod
-    async def delete_jogo(self, jogo_id: int) -> bool:
+    async def delete_jogo(
+        self,
+        jogo_id: int,
+    ) -> bool:
         ...

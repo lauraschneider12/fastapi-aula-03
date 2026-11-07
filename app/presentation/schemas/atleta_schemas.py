@@ -2,7 +2,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, AliasPath
 
 
 class AtletaCreate(BaseModel):
@@ -28,6 +28,6 @@ class AtletaRead(BaseModel):
     posicao: str
     numero: int
     status: bool
-    user_id: UUID
-    criado_em: datetime
-    alterado_em: datetime
+    user_id: UUID = Field(
+        validation_alias=AliasPath("user_identity", "id")
+    )
