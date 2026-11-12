@@ -96,23 +96,31 @@
         desenharGrafico();
     }
 
-    onMount(async () => {
-        try {
-            estatisticas = await requisicao('/area-atleta/estatisticas');
+ 
+onMount(async () => {
+    try {
+        estatisticas = await requisicao('/area-atleta/estatisticas');
 
-            if (estatisticas.temporadas?.length > 0) {
-                temporadaSelecionada = String(estatisticas.temporadas[0].elenco_id);
+        if (estatisticas.temporadas?.length > 0) {
+            temporadaSelecionada = String(estatisticas.temporadas[0].elenco_id);
 
-                await carregarGoogleCharts();
-                await tick();
-                desenharGrafico();
-            }
-        } catch (e) {
-            erro = e.message;
-        } finally {
-            carregando = false;
+            await carregarGoogleCharts();
         }
-    });
+    } catch (e) {
+        erro = e.message;
+    } finally {
+        carregando = false;
+    }
+
+    // Espera o Svelte renderizar o gráfico na página.
+    await tick();
+
+    // Agora o elemento HTML já deve existir.
+    if (!erro && estatisticas?.temporadas?.length > 0) {
+        desenharGrafico();
+    }
+});
+
 </script>
 
 <svelte:head>

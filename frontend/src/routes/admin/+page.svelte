@@ -1,7 +1,9 @@
 
 <script>
-     import { goto } from '$app/navigation';
+    import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
+
+    import { UsersRound, Shield, CalendarDays, Dumbbell, Megaphone, ClipboardCheck } from '@lucide/svelte';
 
     onMount(() => {
         const token = sessionStorage.getItem('access_token');
@@ -15,45 +17,45 @@
         {
             titulo: 'Atletas',
             descricao: 'Cadastrar, consultar e gerenciar atletas.',
-            icone: '👥',
+            icone: UsersRound,
             rota: '/admin/atletas'
         },
         {
             titulo: 'Elencos',
             descricao: 'Consultar e organizar os elencos do clube.',
-            icone: '⚽',
+            icone: Shield,
             rota: '/admin/elencos'
         },
         {
             titulo: 'Agenda de jogos',
             descricao: 'Consultar a agenda e os próximos jogos.',
-            icone: '📅',
+            icone: CalendarDays,
             rota: '/admin/agenda'
         },
         {
-        titulo: 'Treinos',
-        descricao: 'Cadastrar e organizar os treinos dos elencos.',
-        icone: '🏃‍♀️',
-        rota: '/admin/treinos'
-    },
-    {
-        titulo: 'Avisos',
-        descricao: 'Publicar e gerenciar comunicados para as atletas.',
-        icone: '📢',
-        rota: '/admin/avisos'
-    },
-    {
-        titulo: 'Presenças',
-        descricao: 'Registrar e consultar a presença nos treinos.',
-        icone: '📋',
-        rota: '/admin/presencas'
-    }
+            titulo: 'Treinos',
+            descricao: 'Cadastrar e organizar os treinos dos elencos.',
+            icone: Dumbbell,
+            rota: '/admin/treinos'
+        },
+        {
+            titulo: 'Avisos',
+            descricao: 'Publicar e gerenciar comunicados para as atletas.',
+            icone: Megaphone,
+            rota: '/admin/avisos'
+        },
+        {
+            titulo: 'Presenças',
+            descricao: 'Registrar e consultar a presença nos treinos.',
+            icone: ClipboardCheck,
+            rota: '/admin/presencas'
+        }
     ];
 
     function sair() {
         sessionStorage.removeItem('access_token');
         goto('/login');
-}
+    }
 </script>
 
 <svelte:head>
@@ -81,7 +83,10 @@
         <div class="grade">
             {#each secoes as secao}
                 <article class="cartao">
-                    <span class="icone">{secao.icone}</span>
+                    <div class="icone">
+                        <secao.icone size={32} strokeWidth={1.8} />
+                    </div>
+
                     <h3>{secao.titulo}</h3>
                     <p>{secao.descricao}</p>
 
@@ -157,10 +162,16 @@
     }
 
     .grade {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-        gap: 22px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+}
+
+@media (max-width: 900px) {
+    .grade {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+}
 
     .cartao {
         background: white;
@@ -170,7 +181,15 @@
     }
 
     .icone {
-        font-size: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 58px;
+        height: 58px;
+        border-radius: 12px;
+        background: #e8f2ec;
+        color: #236b50;
+        margin-bottom: 18px;
     }
 
     .cartao h3 {
@@ -194,14 +213,18 @@
         background: #194e3a;
     }
 
-    @media (max-width: 600px) {
-        .pagina {
-            padding: 16px;
-        }
-
-        .cabecalho {
-            align-items: flex-start;
-            flex-direction: column;
-        }
+   @media (max-width: 600px) {
+    .pagina {
+        padding: 16px;
     }
+
+    .cabecalho {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .grade {
+        grid-template-columns: 1fr;
+    }
+}
 </style>

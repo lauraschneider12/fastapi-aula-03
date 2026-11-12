@@ -1,6 +1,6 @@
 
 <script>
-    import { onMount } from 'svelte';
+    import { onMount, tick } from 'svelte';
     import { page } from '$app/state';
 
     import {
@@ -34,6 +34,7 @@
     async function carregarPerfil() {
         carregando = true;
         erro = '';
+        googleChartsCarregado = false;
 
         try {
             const idAtual = atletaId;
@@ -60,7 +61,9 @@
                     ? String(temporadas[0].elenco_id)
                     : '';
 
-            await carregarGoogleCharts();
+            if (temporadas.length > 0) {
+                await carregarGoogleCharts();
+            }
         } catch (error) {
             console.error('Erro ao carregar perfil:', error);
             erro = 'Não foi possível carregar o perfil da atleta.';
@@ -141,14 +144,31 @@
         });
     }
 
-    $effect(() => {
-        const temporada = temporadaAtual;
-        const bibliotecaCarregada = googleChartsCarregado;
+    
+$effect(() => {
+    const temporada = temporadaAtual;
+    const bibliotecaCarregada = googleChartsCarregado;
+    const carregamentoFinalizado = !carregando;
 
-        if (temporada && bibliotecaCarregada) {
-            desenharGrafico(temporada);
-        }
-    });
+    if (
+        temporada &&
+        bibliotecaCarregada &&
+        carregamentoFinalizado
+    ) {
+        let cancelado = false;
+
+        tick().then(() => {
+            if (!cancelado) {
+                desenharGrafico(temporada);
+            }
+        });
+
+        return () => {
+            cancelado = true;
+        };
+    }
+});
+
 
     function desenharGrafico(temporada) {
         if (!window.google?.visualization || !temporada) {
@@ -159,7 +179,10 @@
             'grafico-estatisticas'
         );
 
-        if (!elemento) return;
+        if (!elemento) {
+            console.warn('Elemento do gráfico ainda não encontrado.');
+            return;
+        }
 
         const dados =
             window.google.visualization.arrayToDataTable([
@@ -178,20 +201,20 @@
                 width: '75%',
                 height: '80%'
             },
-            hAxis: {
+            vAxis: {
                 minValue: 0,
                 format: '0',
                 textStyle: {
-                    color: '#536174'
+                    color: '#536174',
+                    fontSize: 13
                 },
                 gridlines: {
                     color: '#edf0f3'
                 }
             },
-            vAxis: {
+            hAxis: {
                 textStyle: {
-                    color: '#536174',
-                    fontSize: 13
+                    color: '#536174'
                 }
             },
             height: 300,

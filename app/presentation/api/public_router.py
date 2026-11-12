@@ -124,7 +124,7 @@ async def listar_elencos_publicos(
             ],
         }
         for elenco in elencos
-        if elenco.status
+
     ]
 
 

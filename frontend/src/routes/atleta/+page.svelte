@@ -3,6 +3,14 @@
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
 
+    import {
+        CalendarDays,
+        Megaphone,
+        ClipboardCheck,
+        ChartColumn,
+        UserRound
+    } from '@lucide/svelte';
+
     const API_URL = 'http://localhost:17000';
 
     let carregando = $state(true);
@@ -12,31 +20,31 @@
         {
             titulo: 'Minha agenda',
             descricao: 'Consulte os próximos treinos e compromissos do elenco.',
-            icone: '📅',
+            icone: CalendarDays,
             rota: '/atleta/treinos'
         },
         {
             titulo: 'Avisos',
             descricao: 'Confira os comunicados e informações do clube.',
-            icone: '📢',
+            icone: Megaphone,
             rota: '/atleta/avisos'
         },
         {
             titulo: 'Presença',
             descricao: 'Confirme sua participação nos próximos treinos.',
-            icone: '✅',
+            icone: ClipboardCheck,
             rota: '/atleta/presenca'
         },
         {
             titulo: 'Meu histórico',
             descricao: 'Consulte seu histórico de participação e estatísticas.',
-            icone: '📊',
+            icone: ChartColumn,
             rota: '/atleta/historico'
         },
         {
             titulo: 'Meu perfil',
             descricao: 'Consulte suas informações pessoais e esportivas.',
-            icone: '👤',
+            icone: UserRound,
             rota: '/atleta/perfil'
         }
     ];
@@ -50,7 +58,6 @@
         }
 
         try {
-            // Primeiro verifica se o usuário está autenticado
             const resposta = await fetch(`${API_URL}/auth/me`, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -70,7 +77,6 @@
                 return;
             }
 
-            // Depois busca o nome completo da atleta
             const respostaPerfil = await fetch(
                 `${API_URL}/area-atleta/perfil`,
                 {
@@ -147,12 +153,14 @@
 
             <div class="grade">
 
-                {#each secoes as secao}
-                    <article class="cartao">
+              {#each secoes as secao}
+    {@const Icone = secao.icone}
 
-                        <span class="icone">
-                            {secao.icone}
-                        </span>
+    <article class="cartao">
+
+        <div class="icone">
+            <Icone size={32} strokeWidth={1.8} />
+        </div>
 
                         <h3>{secao.titulo}</h3>
 
@@ -260,7 +268,7 @@
 
     .grade {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 22px;
     }
 
@@ -272,7 +280,15 @@
     }
 
     .icone {
-        font-size: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 58px;
+        height: 58px;
+        border-radius: 12px;
+        background: #e8f2ec;
+        color: #236b50;
+        margin-bottom: 18px;
     }
 
     .cartao h3 {
@@ -311,6 +327,12 @@
         color: #687386;
     }
 
+    @media (max-width: 900px) {
+        .grade {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
     @media (max-width: 600px) {
         .pagina {
             padding: 16px;
@@ -323,6 +345,10 @@
 
         h1 {
             font-size: 25px;
+        }
+
+        .grade {
+            grid-template-columns: 1fr;
         }
     }
 </style>
